@@ -35,21 +35,21 @@ function Loans() {
 
   async function issue(e: React.FormEvent) {
     e.preventDefault();
-    if (!bookId || !memberId) return toast.error("Choose a book and a member");
+    if (!bookId || !memberId) { toast.error("Choose a book and a member"); return; }
     const { error } = await supabase.rpc("issue_book", { _book_id: bookId, _member_id: memberId, _days: days });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Book issued");
     setBookId(""); refresh();
   }
   async function returnBook(l: Loan) {
     const { data, error } = await supabase.rpc("return_book", { _loan_id: l.id, _fine_per_day: FINE_PER_DAY });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(Number(data) > 0 ? `Returned. Late fine: ${rupees(Number(data))}` : "Returned on time — no fine");
     refresh();
   }
   async function markPaid(l: Loan) {
     const { error } = await supabase.from("loans").update({ fine_paid: true }).eq("id", l.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Fine marked as paid"); refresh();
   }
 

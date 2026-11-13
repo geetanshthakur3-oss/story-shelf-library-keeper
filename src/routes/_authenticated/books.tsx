@@ -44,12 +44,12 @@ function Books() {
     let error;
     if (editing) {
       const onLoan = editing.total_copies - editing.available_copies;
-      if (form.total_copies < onLoan) return toast.error(`${onLoan} copies are on loan — total can't be lower.`);
+      if (form.total_copies < onLoan) { toast.error(`${onLoan} copies are on loan — total can't be lower.`); return; }
       ({ error } = await supabase.from("books").update({ ...form, available_copies: form.total_copies - onLoan }).eq("id", editing.id));
     } else {
       ({ error } = await supabase.from("books").insert({ ...form, available_copies: form.total_copies }));
     }
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(editing ? "Book updated" : "Book added");
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["books"] });
@@ -58,7 +58,7 @@ function Books() {
   async function remove(b: Book) {
     if (!confirm(`Delete "${b.title}"? Its loan history will be removed too.`)) return;
     const { error } = await supabase.from("books").delete().eq("id", b.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Book deleted");
     qc.invalidateQueries();
   }

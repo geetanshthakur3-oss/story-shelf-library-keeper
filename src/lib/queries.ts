@@ -18,4 +18,6 @@ export async function fetchMembers() {
   if (error) throw error;
   return data;
 }
+export type Book = Awaited<ReturnType<typeof fetchBooks>>[number];
+export type Member = Awaited<ReturnType<typeof fetchMembers>>[number];
 export type Loan = Awaited<ReturnType<typeof fetchLoans>>[number];

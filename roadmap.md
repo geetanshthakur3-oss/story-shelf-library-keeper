@@ -1,11 +1,11 @@
 # Shelfwise upgrade
 
-- [ ] Restyle the public homepage and sign-in experience in navy and white
-- [ ] Build a responsive professional workspace with dark mode and mobile navigation
-- [ ] Upgrade the librarian dashboard with live metrics, charts, and quick actions
-- [ ] Polish book search and add/edit/delete workflows
-- [ ] Polish member registration, search, and member management
+- [x] Restyle the public homepage and sign-in experience in navy and white
+- [x] Build a responsive professional workspace with dark mode and mobile navigation
+- [ ] Finish the live librarian dashboard with all requested metrics and interactive charts
+- [ ] Polish book search, filters, and add/edit/delete workflows with loading and error states
+- [ ] Finish member registration, search, profiles, and borrowing history
 - [ ] Polish issue/return workflows and preserve automatic ₹5/day fines
-- [ ] Add an in-app notification centre for due, overdue, and fine activity
-- [ ] Add reports with exportable circulation and fine data
-- [ ] Run tests and verify the main desktop and mobile flows without changing existing data
+- [x] Add an in-app notification centre for due, overdue, and fine activity
+- [ ] Add PDF and Excel report exports using live backend data
+- [ ] Run automated tests and verify important desktop/mobile workflows without changing existing data

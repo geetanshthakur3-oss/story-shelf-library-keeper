@@ -14,16 +14,149 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      books: {
+        Row: {
+          author: string
+          available_copies: number
+          category: string | null
+          created_at: string
+          id: string
+          isbn: string | null
+          title: string
+          total_copies: number
+        }
+        Insert: {
+          author: string
+          available_copies?: number
+          category?: string | null
+          created_at?: string
+          id?: string
+          isbn?: string | null
+          title: string
+          total_copies?: number
+        }
+        Update: {
+          author?: string
+          available_copies?: number
+          category?: string | null
+          created_at?: string
+          id?: string
+          isbn?: string | null
+          title?: string
+          total_copies?: number
+        }
+        Relationships: []
+      }
+      loans: {
+        Row: {
+          book_id: string
+          due_date: string
+          fine_amount: number
+          fine_paid: boolean
+          id: string
+          issued_at: string
+          member_id: string
+          returned_at: string | null
+        }
+        Insert: {
+          book_id: string
+          due_date: string
+          fine_amount?: number
+          fine_paid?: boolean
+          id?: string
+          issued_at?: string
+          member_id: string
+          returned_at?: string | null
+        }
+        Update: {
+          book_id?: string
+          due_date?: string
+          fine_amount?: number
+          fine_paid?: boolean
+          id?: string
+          issued_at?: string
+          member_id?: string
+          returned_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      issue_book: {
+        Args: { _book_id: string; _days?: number; _member_id: string }
+        Returns: string
+      }
+      return_book: {
+        Args: { _fine_per_day?: number; _loan_id: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "librarian" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +283,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["librarian", "member"],
+    },
   },
 } as const

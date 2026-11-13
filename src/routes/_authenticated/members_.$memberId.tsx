@@ -8,7 +8,7 @@ import { LoadingState, ErrorState } from "@/components/AsyncState";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/_authenticated/members/$memberId")({
+export const Route = createFileRoute("/_authenticated/members_/$memberId")({
   head: () => ({
     meta: [
       { title: "Member profile — Shelfwise" },

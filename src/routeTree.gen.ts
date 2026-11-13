@@ -17,7 +17,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated/loans'
 import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedMembersMemberIdRouteImport } from './routes/_authenticated/members.$memberId'
+import { Route as AuthenticatedMembersMemberIdRouteImport } from './routes/_authenticated/members_.$memberId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,9 +60,9 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
 } as any)
 const AuthenticatedMembersMemberIdRoute =
   AuthenticatedMembersMemberIdRouteImport.update({
-    id: '/$memberId',
-    path: '/$memberId',
-    getParentRoute: () => AuthenticatedMembersRoute,
+    id: '/members_/$memberId',
+    path: '/members/$memberId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -71,7 +71,7 @@ export interface FileRoutesByFullPath {
   '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/members': typeof AuthenticatedMembersRouteWithChildren
+  '/members': typeof AuthenticatedMembersRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
@@ -81,7 +81,7 @@ export interface FileRoutesByTo {
   '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/members': typeof AuthenticatedMembersRouteWithChildren
+  '/members': typeof AuthenticatedMembersRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
@@ -93,9 +93,9 @@ export interface FileRoutesById {
   '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
-  '/_authenticated/members': typeof AuthenticatedMembersRouteWithChildren
+  '/_authenticated/members': typeof AuthenticatedMembersRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
-  '/_authenticated/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
+  '/_authenticated/members_/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,7 +128,7 @@ export interface FileRouteTypes {
     | '/_authenticated/loans'
     | '/_authenticated/members'
     | '/_authenticated/reports'
-    | '/_authenticated/members/$memberId'
+    | '/_authenticated/members_/$memberId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,41 +195,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/members/$memberId': {
-      id: '/_authenticated/members/$memberId'
-      path: '/$memberId'
+    '/_authenticated/members_/$memberId': {
+      id: '/_authenticated/members_/$memberId'
+      path: '/members/$memberId'
       fullPath: '/members/$memberId'
       preLoaderRoute: typeof AuthenticatedMembersMemberIdRouteImport
-      parentRoute: typeof AuthenticatedMembersRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
-
-interface AuthenticatedMembersRouteChildren {
-  AuthenticatedMembersMemberIdRoute: typeof AuthenticatedMembersMemberIdRoute
-}
-
-const AuthenticatedMembersRouteChildren: AuthenticatedMembersRouteChildren = {
-  AuthenticatedMembersMemberIdRoute: AuthenticatedMembersMemberIdRoute,
-}
-
-const AuthenticatedMembersRouteWithChildren =
-  AuthenticatedMembersRoute._addFileChildren(AuthenticatedMembersRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
-  AuthenticatedMembersRoute: typeof AuthenticatedMembersRouteWithChildren
+  AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedMembersMemberIdRoute: typeof AuthenticatedMembersMemberIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
-  AuthenticatedMembersRoute: AuthenticatedMembersRouteWithChildren,
+  AuthenticatedMembersRoute: AuthenticatedMembersRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedMembersMemberIdRoute: AuthenticatedMembersMemberIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

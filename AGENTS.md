@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Library data access goes through the browser client with database row-level rules; issuing and returning books use database functions so copy counts stay consistent.
+- Fine rate and loan length live in src/lib/library.ts (tested in src/test/library.test.ts) so the UI and return logic share one value.

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 type NavItem = { to: "/dashboard" | "/books" | "/members" | "/loans" | "/reports"; label: string; icon: ComponentType<{ className?: string }> };
 
-function Navigation({ links, onNavigate }: { links: NavItem[]; onNavigate?: () => void }) {
+function Navigation({ links, onNavigate }: { links: NavItem[]; onNavigate?: (() => void) | undefined }) {
   return (
     <nav className="mt-8 flex flex-1 flex-col gap-1.5" aria-label="Main navigation">
       <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">Workspace</p>

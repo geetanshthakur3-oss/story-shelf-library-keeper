@@ -17,6 +17,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated/loans'
 import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedMembersMemberIdRouteImport } from './routes/_authenticated/members.$memberId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +58,12 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMembersMemberIdRoute =
+  AuthenticatedMembersMemberIdRouteImport.update({
+    id: '/$memberId',
+    path: '/$memberId',
+    getParentRoute: () => AuthenticatedMembersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -64,8 +71,9 @@ export interface FileRoutesByFullPath {
   '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/members': typeof AuthenticatedMembersRoute
+  '/members': typeof AuthenticatedMembersRouteWithChildren
   '/reports': typeof AuthenticatedReportsRoute
+  '/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -73,8 +81,9 @@ export interface FileRoutesByTo {
   '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/members': typeof AuthenticatedMembersRoute
+  '/members': typeof AuthenticatedMembersRouteWithChildren
   '/reports': typeof AuthenticatedReportsRoute
+  '/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -84,16 +93,31 @@ export interface FileRoutesById {
   '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
-  '/_authenticated/members': typeof AuthenticatedMembersRoute
+  '/_authenticated/members': typeof AuthenticatedMembersRouteWithChildren
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/members/$memberId': typeof AuthenticatedMembersMemberIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/books' | '/dashboard' | '/loans' | '/members' | '/reports'
+    | '/'
+    | '/auth'
+    | '/books'
+    | '/dashboard'
+    | '/loans'
+    | '/members'
+    | '/reports'
+    | '/members/$memberId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/books' | '/dashboard' | '/loans' | '/members' | '/reports'
+    | '/'
+    | '/auth'
+    | '/books'
+    | '/dashboard'
+    | '/loans'
+    | '/members'
+    | '/reports'
+    | '/members/$memberId'
   id:
     | '__root__'
     | '/'
@@ -104,6 +128,7 @@ export interface FileRouteTypes {
     | '/_authenticated/loans'
     | '/_authenticated/members'
     | '/_authenticated/reports'
+    | '/_authenticated/members/$memberId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,14 +195,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/members/$memberId': {
+      id: '/_authenticated/members/$memberId'
+      path: '/$memberId'
+      fullPath: '/members/$memberId'
+      preLoaderRoute: typeof AuthenticatedMembersMemberIdRouteImport
+      parentRoute: typeof AuthenticatedMembersRoute
+    }
   }
 }
+
+interface AuthenticatedMembersRouteChildren {
+  AuthenticatedMembersMemberIdRoute: typeof AuthenticatedMembersMemberIdRoute
+}
+
+const AuthenticatedMembersRouteChildren: AuthenticatedMembersRouteChildren = {
+  AuthenticatedMembersMemberIdRoute: AuthenticatedMembersMemberIdRoute,
+}
+
+const AuthenticatedMembersRouteWithChildren =
+  AuthenticatedMembersRoute._addFileChildren(AuthenticatedMembersRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
-  AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
+  AuthenticatedMembersRoute: typeof AuthenticatedMembersRouteWithChildren
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
 }
 
@@ -185,7 +228,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
-  AuthenticatedMembersRoute: AuthenticatedMembersRoute,
+  AuthenticatedMembersRoute: AuthenticatedMembersRouteWithChildren,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
 }
 

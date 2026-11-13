@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, type ComponentType } from "react";
+import { useMemo, useState, type ComponentType } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 import { ArrowRight, ArrowUpRight, BookCopy, BookOpenCheck, Clock3, IndianRupee, Plus, RotateCcw, Users } from "lucide-react";
 import { useLibraryUser } from "@/hooks/use-library-user";
-import { fetchBooks, fetchLoans } from "@/lib/queries";
+import { fetchBooks, fetchLoans, fetchMembers } from "@/lib/queries";
 import { calcFine, rupees } from "@/lib/library";
 import { buildMonthlyActivity } from "@/lib/reports";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingState, ErrorState } from "@/components/AsyncState";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -37,9 +39,12 @@ function Stat({ label, value, note, icon: Icon, urgent = false }: { label: strin
 }
 
 function Dashboard() {
-  const { data: me } = useLibraryUser();
+  const { data: me, isLoading: meLoading } = useLibraryUser();
+  const isLibrarian = !!me?.isLibrarian;
   const booksQuery = useQuery({ queryKey: ["books"], queryFn: fetchBooks });
   const loansQuery = useQuery({ queryKey: ["loans"], queryFn: fetchLoans });
+  const membersQuery = useQuery({ queryKey: ["members"], queryFn: fetchMembers, enabled: isLibrarian });
+  const [months, setMonths] = useState("6");
   const all = useMemo(() => loansQuery.data ?? [], [loansQuery.data]);
   const books = useMemo(() => booksQuery.data ?? [], [booksQuery.data]);
   const active = all.filter((loan) => !loan.returned_at);
@@ -47,10 +52,13 @@ function Dashboard() {
   const unpaid = all.filter((loan) => loan.returned_at && !loan.fine_paid).reduce((sum, loan) => sum + Number(loan.fine_amount), 0) + overdue.reduce((sum, loan) => sum + calcFine(loan.due_date), 0);
   const totalCopies = books.reduce((sum, book) => sum + book.total_copies, 0);
   const availableCopies = books.reduce((sum, book) => sum + book.available_copies, 0);
-  const monthly = useMemo(() => buildMonthlyActivity(all, 6), [all]);
+  const monthly = useMemo(() => buildMonthlyActivity(all, Number(months)), [all, months]);
   const availability = [{ name: "Available", value: availableCopies }, { name: "On loan", value: totalCopies - availableCopies }];
   const firstName = me?.profile?.full_name?.trim().split(" ")[0] || "there";
-  const isLibrarian = !!me?.isLibrarian;
+
+  if (meLoading || booksQuery.isLoading || loansQuery.isLoading || (isLibrarian && membersQuery.isLoading)) return <LoadingState label="Loading live library statistics…" cards={6} />;
+  const error = booksQuery.error ?? loansQuery.error ?? membersQuery.error;
+  if (error) return <ErrorState error={error} onRetry={() => { booksQuery.refetch(); loansQuery.refetch(); if (isLibrarian) membersQuery.refetch(); }} />;
 
   return (
     <div>
@@ -60,12 +68,14 @@ function Dashboard() {
         action={<Button asChild className="rounded-xl"><Link to={isLibrarian ? "/loans" : "/books"}>{isLibrarian ? <Plus /> : <BookOpenCheck />}{isLibrarian ? "Issue a book" : "Browse books"}</Link></Button>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {isLibrarian ? (
           <>
-            <Stat label="Collection" value={books.length} note={`${totalCopies} copies across the catalog`} icon={BookCopy} />
-            <Stat label="Books on loan" value={active.length} note={`${availableCopies} copies currently available`} icon={BookOpenCheck} />
-            <Stat label="Overdue loans" value={overdue.length} note={overdue.length ? "Returns need your attention" : "Everything is on schedule"} icon={Clock3} urgent={overdue.length > 0} />
+            <Stat label="Total books" value={totalCopies} note={`${books.length} titles in the catalog`} icon={BookCopy} />
+            <Stat label="Available books" value={availableCopies} note="Copies ready to issue" icon={BookOpenCheck} />
+            <Stat label="Issued books" value={active.length} note="Current active loans" icon={ArrowRight} />
+            <Stat label="Registered members" value={membersQuery.data?.length ?? 0} note="Live member accounts" icon={Users} />
+            <Stat label="Overdue books" value={overdue.length} note={overdue.length ? "Returns need your attention" : "Everything is on schedule"} icon={Clock3} urgent={overdue.length > 0} />
             <Stat label="Outstanding fines" value={rupees(unpaid)} note="Live overdue and unpaid balances" icon={IndianRupee} urgent={unpaid > 0} />
           </>
         ) : (
@@ -80,7 +90,7 @@ function Dashboard() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.65fr_1fr]">
         <section className="min-w-0 rounded-2xl border bg-card p-5 shadow-card sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-sans text-lg font-bold">Circulation activity</h2><p className="mt-1 text-xs text-muted-foreground">Issues and returns over the last six months</p></div><Button asChild variant="ghost" size="sm"><Link to="/loans">View loans<ArrowUpRight /></Link></Button></div>
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-sans text-lg font-bold">Circulation activity</h2><p className="mt-1 text-xs text-muted-foreground">Interactive issues and returns chart</p></div><div className="flex items-center gap-1"><Select value={months} onValueChange={setMonths}><SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="6">6 months</SelectItem><SelectItem value="12">12 months</SelectItem></SelectContent></Select><Button asChild variant="ghost" size="sm"><Link to="/loans" aria-label="View loans"><ArrowUpRight /></Link></Button></div></div>
           <ChartContainer config={{ issued: { label: "Issued", color: "var(--chart-1)" }, returned: { label: "Returned", color: "var(--chart-2)" } }} className="mt-6 h-[270px] w-full aspect-auto">
             <AreaChart data={monthly} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
